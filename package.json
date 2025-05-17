@@ -10,7 +10,7 @@
     "lerna": "^8.2.2"
   },
   "scripts": {
-    "dev": "concurrently \"yarn workspace frontend dev\" \"yarn workspace backend start:dev\"",
+    "dev": "concurrently \"yarn workspace frontend dev --host\" \"yarn workspace backend start:dev\"",
     "test": "yarn workspace backend test:cov"
   }
 }
