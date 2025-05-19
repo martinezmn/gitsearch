@@ -23,6 +23,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.0",
     "pg": "^8.16.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
@@ -71,6 +72,20 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coveragePathIgnorePatterns": [
+      "main.ts",
+      "\\.module\\.ts$",
+      "/src/database/*",
+      "/src/apis/*"
+    ],
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "statements": 95,
+        "branches": 95,
+        "functions": 95,
+        "lines": 95
+      }
+    }
   }
 }
