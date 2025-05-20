@@ -6,6 +6,6 @@ export interface GitProfileInterface {
   bio: string;
   avatarUrl: string;
   followers: number;
-  lastFetchAt: Date;
-  createdAt: Date;
+  lastFetchAt: string;
+  createdAt: string;
 }

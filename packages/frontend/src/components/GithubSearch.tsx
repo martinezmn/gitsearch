@@ -1,11 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiService } from "../api/ApiService";
-import type { GitProfileInterface } from "../interfaces/git-profile.interface";
+import { useState } from "react";
 
 export default function GithubSearch() {
+  const queryClient = useQueryClient();
+
+  const [username, setUsername] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
   const { data: profiles, isLoading } = useQuery({
-    queryFn: () => ApiService.getGithubProfiles(),
-    queryKey: ["git-profiles"],
+    queryFn: ApiService.getGithubProfiles,
+    queryKey: ["profiles"],
+  });
+
+  const { mutate: searchProfile } = useMutation({
+    mutationFn: ApiService.searchGithubProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profiles"] });
+      setUsername("");
+    },
+    onError: (error) => {
+      setErrorMessage(error.message);
+    },
   });
 
   return (
@@ -23,7 +39,10 @@ export default function GithubSearch() {
             </h2>
           </div>
           <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form action="#" method="POST" className="space-y-6">
+            <form
+              onSubmit={(e) => [e.preventDefault(), searchProfile(username)]}
+              className="space-y-6"
+            >
               <div>
                 <label
                   htmlFor="email"
@@ -33,11 +52,10 @@ export default function GithubSearch() {
                 </label>
                 <div className="mt-2">
                   <input
-                    id="email"
-                    name="email"
-                    type="email"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
-                    autoComplete="email"
                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-600 sm:text-sm/6"
                   />
                 </div>
@@ -50,13 +68,16 @@ export default function GithubSearch() {
                   Search
                 </button>
               </div>
+              {errorMessage && (
+                <p className="text-sm text-red-700">{errorMessage}</p>
+              )}
             </form>
           </div>
         </div>
         <div className="flex min-h-full flex-1 flex-col justify-center">
           <ul role="list" className="divide-y divide-gray-100">
             {!isLoading &&
-              profiles.map((profile: GitProfileInterface) => (
+              profiles?.map((profile) => (
                 <li
                   key={profile.login}
                   className="flex justify-between gap-x-6 py-5"
@@ -72,15 +93,19 @@ export default function GithubSearch() {
                         {profile.name}
                       </p>
                       <p className="mt-1 truncate text-xs/5 text-gray-500">
-                        {profile.login}
+                        {profile.login} - {profile.followers}
+                        {profile.followers === 1 ? " follower" : " followers"}
                       </p>
                     </div>
                   </div>
                   <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
                     <p className="text-sm/6 text-gray-900">{profile.bio}</p>
                     <p className="mt-1 text-xs/5 text-gray-500">
-                      {profile.followers}
-                      {profile.followers === 1 ? " follower" : " followers"}
+                      {new Date(profile.createdAt).toLocaleTimeString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </p>
                   </div>
                 </li>

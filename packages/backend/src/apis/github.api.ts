@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class GithubAPI {
@@ -10,6 +10,9 @@ export class GithubAPI {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new NotFoundException('GitHub profile not found.');
+      }
       throw new Error(`Error fetching GitHub API: ${response.statusText}`);
     }
 
